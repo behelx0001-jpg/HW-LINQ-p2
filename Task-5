@@ -1,0 +1,119 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Task5
+{
+    class Phone
+    {
+        public string Name { get; set; }
+        public string Manufacturer { get; set; }
+        public double Price { get; set; }
+        public DateTime ReleaseDate { get; set; }
+
+        public Phone(string name, string manufacturer, double price, DateTime releaseDate)
+        {
+            Name = name;
+            Manufacturer = manufacturer;
+            Price = price;
+            ReleaseDate = releaseDate;
+        }
+
+        public override string ToString()
+        {
+            return $"{Name} ({Manufacturer}), ціна: {Price}, дата випуску: {ReleaseDate:d}";
+        }
+    }
+
+    class Program
+    {
+        static Phone[] phones;
+
+        static void Main(string[] args)
+        {
+            SeedData();
+
+            Console.WriteLine("--- Завдання 3 (агрегатні операції) ---");
+            Console.WriteLine("Кількість телефонів: " + phones.Count());
+            Console.WriteLine("Кількість телефонів із ціною > 100: " + phones.Count(phone => phone.Price > 100));
+            Console.WriteLine("Кількість телефонів із ціною від 400 до 700: " +
+                phones.Count(phone => phone.Price >= 400 && phone.Price <= 700));
+            Console.WriteLine("Кількість телефонів Samsung: " + phones.Count(phone => phone.Manufacturer == "Samsung"));
+            Console.WriteLine("Мінімальна ціна: " + phones.OrderBy(phone => phone.Price).First());
+            Console.WriteLine("Максимальна ціна: " + phones.OrderByDescending(phone => phone.Price).First());
+            Console.WriteLine("Найстаріший: " + phones.OrderBy(phone => phone.ReleaseDate).First());
+            Console.WriteLine("Найсвіжіший: " + phones.OrderByDescending(phone => phone.ReleaseDate).First());
+            Console.WriteLine("Середня ціна: " + Math.Round(phones.Average(phone => phone.Price), 2));
+
+            Console.WriteLine("\n--- Завдання 4 (Skip/Take) ---");
+            Console.WriteLine("5 найдорожчих:");
+            PrintAll(phones.OrderByDescending(phone => phone.Price).Take(5));
+            Console.WriteLine("\n5 найдешевших:");
+            PrintAll(phones.OrderBy(phone => phone.Price).Take(5));
+            Console.WriteLine("\n3 найстаріші:");
+            PrintAll(phones.OrderBy(phone => phone.ReleaseDate).Take(3));
+            Console.WriteLine("\n3 найновіші:");
+            PrintAll(phones.OrderByDescending(phone => phone.ReleaseDate).Take(3));
+
+            Console.WriteLine("\n--- Завдання 5 (статистика за GroupBy) ---");
+
+            Console.WriteLine("\nСтатистика за кількістю телефонів кожного виробника:");
+            var byManufacturer =
+                from phone in phones
+                group phone by phone.Manufacturer into manufacturerGroup
+                select new { Manufacturer = manufacturerGroup.Key, Count = manufacturerGroup.Count() };
+
+            foreach (var item in byManufacturer)
+                Console.WriteLine($"{item.Manufacturer} — {item.Count}");
+
+            Console.WriteLine("\nСтатистика за кількістю моделей телефонів:");
+            var byModel =
+                from phone in phones
+                group phone by phone.Name into modelGroup
+                select new { Model = modelGroup.Key, Count = modelGroup.Count() };
+
+            foreach (var item in byModel)
+                Console.WriteLine($"{item.Model} — {item.Count}");
+
+            Console.WriteLine("\nСтатистика телефонів за роками:");
+            var byYear =
+                from phone in phones
+                group phone by phone.ReleaseDate.Year into yearGroup
+                orderby yearGroup.Key
+                select new { Year = yearGroup.Key, Count = yearGroup.Count() };
+
+            foreach (var item in byYear)
+                Console.WriteLine($"{item.Year} — {item.Count}");
+
+            Console.ReadKey();
+        }
+
+        static void PrintAll(IEnumerable<Phone> phonesList)
+        {
+            foreach (Phone phone in phonesList)
+                Console.WriteLine(phone);
+        }
+
+        static void SeedData()
+        {
+            phones = new Phone[]
+            {
+                new Phone("iPhone 13", "Apple", 799, new DateTime(2021, 9, 24)),
+                new Phone("iPhone 14", "Apple", 999, new DateTime(2022, 9, 16)),
+                new Phone("iPhone SE", "Apple", 429, new DateTime(2022, 3, 18)),
+                new Phone("Galaxy S22", "Samsung", 749, new DateTime(2022, 2, 25)),
+                new Phone("Galaxy S21", "Samsung", 649, new DateTime(2021, 1, 29)),
+                new Phone("Galaxy A52", "Samsung", 349, new DateTime(2021, 3, 17)),
+                new Phone("Galaxy Note 20", "Samsung", 899, new DateTime(2020, 8, 21)),
+                new Phone("Xperia 1 IV", "Sony", 1099, new DateTime(2022, 6, 30)),
+                new Phone("Xperia 5 III", "Sony", 799, new DateTime(2021, 10, 19)),
+                new Phone("Xperia 10 IV", "Sony", 449, new DateTime(2022, 6, 1)),
+                new Phone("Mi 11", "Xiaomi", 549, new DateTime(2021, 2, 8)),
+                new Phone("Redmi Note 10", "Xiaomi", 199, new DateTime(2021, 3, 4)),
+                new Phone("Poco X4 Pro", "Xiaomi", 299, new DateTime(2022, 2, 15)),
+                new Phone("Pixel 6", "Google", 599, new DateTime(2021, 10, 28)),
+                new Phone("Pixel 7", "Google", 599, new DateTime(2022, 10, 13))
+            };
+        }
+    }
+}
